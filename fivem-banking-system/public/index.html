@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banque d'Entreprise - FiveM</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Page de connexion -->
+    <div id="loginPage" class="page active">
+        <div class="login-container">
+            <div class="login-box">
+                <h1>🏦 Banque d'Entreprise</h1>
+                <p class="subtitle">Connectez-vous pour gérer votre entreprise</p>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="identifier">Identifiant</label>
+                        <input type="text" id="identifier" name="identifier" placeholder="char0:xxxxx..." required>
+                        <small class="help-text">Votre identifiant de joueur FiveM</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Se connecter</button>
+                </form>
+
+                <div id="loginError" class="error-message" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page principale (Dashboard) -->
+    <div id="dashboardPage" class="page">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1>🏦 Banque d'Entreprise</h1>
+                <span id="societyName" class="society-name"></span>
+            </div>
+            <div class="header-right">
+                <span id="userName" class="user-name"></span>
+                <button id="logoutBtn" class="btn btn-secondary">Déconnexion</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="overview">Vue d'ensemble</button>
+            <button class="tab-btn" data-tab="employees">Employés</button>
+            <button class="tab-btn" data-tab="transactions">Transactions</button>
+            <button class="tab-btn" data-tab="transfer">Virement</button>
+        </nav>
+
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <!-- Tab: Vue d'ensemble -->
+            <div id="overviewTab" class="tab-content active">
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3>Solde de l'entreprise</h3>
+                            <p id="societyBalance" class="stat-value">0 $</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h3>Nombre d'employés</h3>
+                            <p id="employeeCount" class="stat-value">0</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <h3>Transactions ce mois</h3>
+                            <p id="monthTransactions" class="stat-value">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-activity">
+                    <h2>Activité récente</h2>
+                    <div id="recentTransactions" class="transaction-list">
+                        <!-- Les transactions récentes seront affichées ici -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Employés -->
+            <div id="employeesTab" class="tab-content">
+                <h2>Liste des employés</h2>
+                <div class="table-container">
+                    <table id="employeesTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Grade</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeesTableBody">
+                            <!-- Les employés seront affichés ici -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Transactions -->
+            <div id="transactionsTab" class="tab-content">
+                <h2>Historique des transactions</h2>
+                <div class="filters">
+                    <select id="transactionFilter">
+                        <option value="all">Toutes les transactions</option>
+                        <option value="income">Revenus</option>
+                        <option value="outcome">Dépenses</option>
+                    </select>
+                </div>
+                <div id="transactionsList" class="transaction-list">
+                    <!-- Les transactions seront affichées ici -->
+                </div>
+            </div>
+
+            <!-- Tab: Virement -->
+            <div id="transferTab" class="tab-content">
+                <h2>Effectuer un virement</h2>
+                <div class="transfer-container">
+                    <form id="transferForm">
+                        <div class="form-group">
+                            <label for="targetEmployee">Employé</label>
+                            <select id="targetEmployee" required>
+                                <option value="">Sélectionnez un employé</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount">Montant ($)</label>
+                            <input type="number" id="amount" name="amount" min="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <input type="text" id="description" name="description" placeholder="Ex: Salaire, Prime, etc.">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Effectuer le virement</button>
+                    </form>
+
+                    <div id="transferSuccess" class="success-message" style="display: none;"></div>
+                    <div id="transferError" class="error-message" style="display: none;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de confirmation -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirmation</h3>
+            <p id="confirmMessage"></p>
+            <div class="modal-actions">
+                <button id="confirmYes" class="btn btn-primary">Confirmer</button>
+                <button id="confirmNo" class="btn btn-secondary">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
