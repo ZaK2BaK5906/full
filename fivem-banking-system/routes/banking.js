@@ -12,46 +12,33 @@ router.get('/society-account', async (req, res) => {
     try {
         const societyName = `society_${req.user.job}`;
 
-        // Récupérer le solde de l'entreprise
-        const [accounts] = await pool.query(
-            'SELECT money FROM addon_account_data WHERE account_name = ? AND owner IS NULL',
-            [societyName]
-        );
-
-        // Récupérer les informations du compte bancaire p_bank
+        // UNIQUEMENT p_bank_accounts
         const [bankAccounts] = await pool.query(
             'SELECT * FROM p_bank_accounts WHERE owner = ? AND type = ?',
             [societyName, 'society']
         );
 
-        if (accounts.length === 0 && bankAccounts.length === 0) {
+        if (bankAccounts.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'Compte de l\'entreprise non trouvé'
+                message: 'Compte bancaire de l\'entreprise non trouvé'
             });
         }
 
-        let balance = 0;
-        let transactions = [];
-        let logs = [];
-
-        if (accounts.length > 0) {
-            balance = accounts[0].money;
-        }
-
-        if (bankAccounts.length > 0) {
-            balance = bankAccounts[0].balance;
-            transactions = JSON.parse(bankAccounts[0].transactions || '[]');
-            logs = JSON.parse(bankAccounts[0].logs || '[]');
-        }
+        const account = bankAccounts[0];
+        const balance = account.balance || 0;
+        const transactions = JSON.parse(account.transactions || '[]');
+        const logs = JSON.parse(account.logs || '[]');
 
         res.json({
             success: true,
             data: {
                 society: req.user.job,
+                societyLabel: account.name,
+                iban: account.iban,
                 balance,
-                transactions: transactions.slice(-50).reverse(), // Dernières 50 transactions
-                logs: logs.slice(-50).reverse() // Derniers 50 logs
+                transactions: transactions.slice(-50).reverse(),
+                logs: logs.slice(-50).reverse()
             }
         });
 
@@ -104,13 +91,13 @@ router.post('/transfer', async (req, res) => {
 
         const societyName = `society_${req.user.job}`;
 
-        // Vérifier le solde de l'entreprise
+        // Vérifier le solde de l'entreprise dans p_bank_accounts
         const [societyAccounts] = await connection.query(
-            'SELECT money FROM addon_account_data WHERE account_name = ? AND owner IS NULL',
-            [societyName]
+            'SELECT balance FROM p_bank_accounts WHERE owner = ? AND type = ?',
+            [societyName, 'society']
         );
 
-        if (societyAccounts.length === 0 || societyAccounts[0].money < amount) {
+        if (societyAccounts.length === 0 || societyAccounts[0].balance < amount) {
             await connection.rollback();
             return res.status(400).json({
                 success: false,
@@ -139,12 +126,6 @@ router.post('/transfer', async (req, res) => {
                 message: 'Cet employé ne fait pas partie de votre entreprise'
             });
         }
-
-        // Débiter le compte de l'entreprise
-        await connection.query(
-            'UPDATE addon_account_data SET money = money - ? WHERE account_name = ? AND owner IS NULL',
-            [amount, societyName]
-        );
 
         // Récupérer ou créer le compte bancaire du joueur
         const [playerBankAccounts] = await connection.query(
