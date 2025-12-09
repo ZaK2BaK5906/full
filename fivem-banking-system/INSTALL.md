@@ -47,6 +47,21 @@ Pour générer un secret sécurisé :
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
+### 2.3 Migration des soldes (IMPORTANT)
+
+Si vous avez déjà des données dans `addon_account_data`, exécutez ce script pour copier les soldes vers `p_bank_accounts` :
+
+```bash
+node migrate-balances.js
+```
+
+Ce script va :
+- Lire tous les soldes des comptes société depuis `addon_account_data`
+- Les copier dans la table `p_bank_accounts`
+- Afficher un rapport détaillé
+
+**Note :** Le système utilise maintenant UNIQUEMENT `p_bank_accounts`. Si vous ne migrez pas les données, tous les comptes auront un solde de 0.
+
 ## 🎮 Étape 3 : Installation du script FiveM (OPTIONNEL)
 
 Si vous voulez que les joueurs puissent récupérer leur identifier en jeu :
